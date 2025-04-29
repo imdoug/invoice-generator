@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoicePreview from "./components/InvoicePreview";
 import DownloadButton from "./components/DownloadButton";
+import { SessionProvider } from "next-auth/react"
 
 
 
@@ -14,26 +15,27 @@ interface InvoiceItem {
 }
 
 
-
 interface InvoiceFormValues {
   businessName: string;
   clientName: string;
   clientAddress: string;
+  dueDate: string;
   items: InvoiceItem[];
   notes?: string;
   currency: string;
   logo?: string;
-  dueDate?: string;
   invoiceNumber?: string;
-  issueDate?: string
+  issueDate?: string;
 }
 
-export default function Page() {
+export default function Page({ session, ...pageProps }) {
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
   const randomNumber = Math.floor(1000 + Math.random() * 9000);
-  const generatedInvoiceNumber = `INV-${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, "0")}${today.getDate().toString().padStart(2, "0")}-${randomNumber}`;
-
+  const generatedInvoiceNumber = `INV-${today.getFullYear()}${(today.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}${today.getDate().toString().padStart(2, "0")}-${randomNumber}`;
+  
   const formMethods = useForm<InvoiceFormValues>({
     defaultValues: {
       businessName: "",
@@ -42,16 +44,18 @@ export default function Page() {
       items: [{ description: "", quantity: 1, price: 0 }],
       notes: "",
       currency: "USD",
-      logo: undefined,
       dueDate: todayStr,
-      invoiceNumber: generatedInvoiceNumber, // 👈 set here
-      issueDate: todayStr, // 👈 set here
+      issueDate: todayStr,
+      invoiceNumber: generatedInvoiceNumber, // ✅ generate once at form load
+      logo: undefined,
     },
   });
 
   const formData = formMethods.watch(); // Live watch!
 
   return (
+    <SessionProvider session={session}>
+    {/* <Component {...pageProps} /> */}
     <main className="min-h-screen bg-secondary p-6 flex flex-col md:flex-row gap-8">
       <section className="md:w-1/2">
         <InvoiceForm formMethods={formMethods} />
@@ -62,5 +66,6 @@ export default function Page() {
         <DownloadButton formData={formData} />
       </section>
     </main>
+    </SessionProvider>
   );
 }

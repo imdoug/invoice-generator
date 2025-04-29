@@ -1,38 +1,72 @@
 "use client";
 
-import { saveAs } from "file-saver"; // New helper
+import { useSession } from "next-auth/react";
+import { supabase } from "@/lib/supabaseClient";
 import { toast } from "react-hot-toast";
 import { pdf } from "@react-pdf/renderer";
-import InvoicePDF from "./InvoicePDF"; // your custom PDF document
-
-interface InvoiceItem {
-  description: string;
-  quantity: number;
-  price: number;
-}
+import { saveAs } from "file-saver";
+import InvoicePDF from "./InvoicePDF";
 
 interface DownloadButtonProps {
-  formData: {
-    businessName: string;
-    clientName: string;
-    clientAddress: string;
-    dueDate: string;
-    items: InvoiceItem[];
-    notes?: string;
-    currency: string;
-    logo?: string;
-    invoiceNumber?: string;
-    issueDate?: string
-  };
+  formData: any;
 }
 
 export default function DownloadButton({ formData }: DownloadButtonProps) {
-  const today = new Date();
-  const dateStr = today.toISOString().split("T")[0];
-  const safeClientName = formData?.clientName ? formData.clientName.replace(/\s+/g, "_") : "Client";
-  const filename = `Invoice-${safeClientName}-${dateStr}.pdf`;
+  const { data: session } = useSession();
 
   const handleDownload = async () => {
+    if (!session?.user?.email) {
+      toast.error("User email not found. Please log in again.");
+      return;
+    }
+
+    // Look up the user in Supabase based on email
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", session.user.email)
+      .single();
+
+    if (userError || !userData) {
+      console.error("Error finding user in Supabase:", userError?.message);
+      toast.error("Could not find user in database.");
+      return;
+    }
+    function generateInvoiceNumber() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const randomPart = Math.floor(1000 + Math.random() * 9000);
+      return `INV-${year}-${randomPart}`;
+    }
+    const generatedInvoiceNumber = formData.invoiceNumber || generateInvoiceNumber();
+
+
+    const userId = userData.id; // ✅ real user id from users table
+
+    // Now save the invoice
+    const { error } = await supabase.from("invoices").insert([
+      {
+        user_id: userId,
+        invoice_number: generatedInvoiceNumber,
+        issue_date: formData.issueDate || new Date().toISOString(),
+        due_date: formData.dueDate || null,
+        client_name: formData.clientName,
+        client_address: formData.clientAddress,
+        items: formData.items,
+        total: formData.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
+        notes: formData.notes || "",
+      }
+    ]);
+
+    if (error) {
+      console.error("Error saving invoice:", error.message);
+      toast.error("Failed to save invoice!");
+      return;
+    }
+
+    toast.success("Invoice saved!");
+
+    // Now download PDF
     const doc = (
       <InvoicePDF
         businessName={formData.businessName}
@@ -43,18 +77,20 @@ export default function DownloadButton({ formData }: DownloadButtonProps) {
         notes={formData.notes}
         currency={formData.currency}
         logo={formData.logo}
-        invoiceNumber={formData.invoiceNumber || "N/A"} // 👈 pulled from form
-        issueDate={formData.issueDate || "N/A"} // 👈 pulled from form
+        invoiceNumber={formData.invoiceNumber}
+        issueDate={formData.issueDate}
       />
     );
 
-    const asPdf = pdf([]); // 👈 creates PDF document
-    asPdf.updateContainer(doc);
-    const blob = await asPdf.toBlob();
+    const generatedPdf = pdf();
+    generatedPdf.updateContainer(doc);
+    const blob = await generatedPdf.toBlob();
+
+    const today = new Date();
+    const safeClientName = formData?.clientName ? formData.clientName.replace(/\s+/g, "_") : "Client";
+    const filename = `Invoice-${safeClientName}-${today.toISOString().split("T")[0]}.pdf`;
 
     saveAs(blob, filename);
-
-    toast.success("Invoice downloaded successfully!");
   };
 
   return (
@@ -63,7 +99,7 @@ export default function DownloadButton({ formData }: DownloadButtonProps) {
       type="button"
       className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
     >
-      Download Invoice PDF
+      Save and Download Invoice
     </button>
   );
 }
