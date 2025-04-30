@@ -1,71 +1,36 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import Link from "next/link";
 
-import { useForm } from "react-hook-form";
-import InvoiceForm from "./components/InvoiceForm";
-import InvoicePreview from "./components/InvoicePreview";
-import DownloadButton from "./components/DownloadButton";
-import { SessionProvider } from "next-auth/react"
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
 
-
-
-interface InvoiceItem {
-  description: string;
-  quantity: number;
-  price: number;
-}
-
-
-interface InvoiceFormValues {
-  businessName: string;
-  clientName: string;
-  clientAddress: string;
-  dueDate: string;
-  items: InvoiceItem[];
-  notes?: string;
-  currency: string;
-  logo?: string;
-  invoiceNumber?: string;
-  issueDate?: string;
-}
-
-export default function Page({ session, ...pageProps }) {
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
-  const randomNumber = Math.floor(1000 + Math.random() * 9000);
-  const generatedInvoiceNumber = `INV-${today.getFullYear()}${(today.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}${today.getDate().toString().padStart(2, "0")}-${randomNumber}`;
-  
-  const formMethods = useForm<InvoiceFormValues>({
-    defaultValues: {
-      businessName: "",
-      clientName: "",
-      clientAddress: "",
-      items: [{ description: "", quantity: 1, price: 0 }],
-      notes: "",
-      currency: "USD",
-      dueDate: todayStr,
-      issueDate: todayStr,
-      invoiceNumber: generatedInvoiceNumber, // ✅ generate once at form load
-      logo: undefined,
-    },
-  });
-
-  const formData = formMethods.watch(); // Live watch!
+  if (!session || !session.user?.email) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 text-center">
+        <p className="text-gray-600 text-lg">Not authenticated. Please log in to access the app.</p>
+        <Link href="/login">
+          <button className="bg-primary hover:bg-blue-500 bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition">
+            Go to Login
+          </button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <SessionProvider session={session}>
-    {/* <Component {...pageProps} /> */}
-    <main className="min-h-screen bg-secondary p-6 flex flex-col md:flex-row gap-8">
-      <section className="md:w-1/2">
-        <InvoiceForm formMethods={formMethods} />
-      </section>
-
-      <section className="md:w-1/2 flex flex-col gap-6">
-        <InvoicePreview formData={formData} />
-        <DownloadButton formData={formData} />
-      </section>
+    <main className="min-h-screen flex flex-col items-center justify-center space-y-8 text-center">
+      <h1 className="text-4xl md:text-5xl font-bold text-primary">
+        Welcome to Invoice Generator
+      </h1>
+      <p className="text-gray-700 max-w-2xl">
+        Easily create, manage, and download your invoices. Fast, simple, and professional.
+      </p>
+      <Link href="/invoices/new">
+        <button className="bg-primary hover:bg-blue-500 bg-blue-700 text-white font-semibold py-3 px-8 rounded-md text-lg shadow transition">
+          Create New Invoice
+        </button>
+      </Link>
     </main>
-    </SessionProvider>
   );
 }

@@ -66,6 +66,13 @@ export default function DashboardContent({ invoices }: DashboardContentProps) {
                   </button>
 
                   <button
+                    onClick={() => router.push(`/invoices/${invoice.id}/edit`)}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    Edit 
+                  </button>
+
+                  <button
                     onClick={() => handleDelete(invoice.id)}
                     className="text-red-500 hover:underline text-sm"
                   >

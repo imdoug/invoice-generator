@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import Navbar from "../components/NavBar";
 
 export default function DashboardContent() {
   const { data: session } = useSession();

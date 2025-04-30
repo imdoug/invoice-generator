@@ -4,14 +4,20 @@ import { supabase } from "@/lib/supabaseClient";
 import DashboardContent from "@/app/components/DashboardContent";
 import { notFound } from "next/navigation";
 import Navbar from "../components/NavBar";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user?.email) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Not authenticated. Please log in.</p>
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 text-center">
+        <p className="text-gray-600 text-lg">Not authenticated. Please log in to access the app.</p>
+        <Link href="/login">
+          <button className="bg-primary hover:bg-blue-500 bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition">
+            Go to Login
+          </button>
+        </Link>
       </div>
     );
   }
@@ -36,9 +42,8 @@ export default async function DashboardPage() {
   const { data: invoices, error: invoicesError } = await supabase
     .from("invoices")
     .select()
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
-    // .eq("user_id", userId)
-    // .order("created_at", { ascending: false });
 
     console.log("Invoices:", invoices);
   if (invoicesError) {
@@ -57,3 +62,4 @@ export default async function DashboardPage() {
     </>
   );
 }
+

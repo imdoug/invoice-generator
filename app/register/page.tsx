@@ -8,6 +8,7 @@ import { signIn } from "next-auth/react";
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {

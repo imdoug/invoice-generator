@@ -1,85 +1,30 @@
-"use client";
-
-import { useForm, FormProvider, useWatch } from "react-hook-form";
-import InvoiceForm from "@/app/components/InvoiceForm";
-import InvoicePreview from "@/app/components/InvoicePreview";
-import DownloadButton from "@/app/components/DownloadButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Navbar from "@/app/components/NavBar";
+import NewInvoiceClient from "@/app/components/NewInvoiceClient"; // 👈 new client component
+import Link from "next/link";
 
-export interface InvoiceItem {
-  description: string;
-  quantity: number;
-  price: number;
-}
+export default async function NewInvoicePage() {
+  const session = await getServerSession(authOptions);
 
-export interface InvoiceFormValues {
-  businessName: string;
-  clientName: string;
-  clientAddress: string;
-  items: InvoiceItem[];
-  notes?: string;
-  currency: string;
-  logo?: string;
-  dueDate: string;
-  invoiceNumber?: string;
-  issueDate?: string;
-}
-
-function generateInvoiceNumber() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const randomPart = Math.floor(1000 + Math.random() * 9000);
-  return `INV-${year}-${randomPart}`;
-}
-
-export default function NewInvoicePage() {
-  const formMethods = useForm<InvoiceFormValues>({
-    defaultValues: {
-      businessName: "",
-      clientName: "",
-      clientAddress: "",
-      items: [{ description: "", quantity: 1, price: 0 }],
-      notes: "",
-      currency: "USD",
-      logo: undefined,
-      dueDate: "",
-      invoiceNumber: generateInvoiceNumber(), 
-      issueDate: "",
-    },
-  });
-
-  const formData = useWatch<InvoiceFormValues>({
-    control: formMethods.control,
-  }) as InvoiceFormValues;
+  if (!session || !session.user?.email) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 text-center">
+        <p className="text-gray-600 text-lg">Not authenticated. Please log in to create an invoice.</p>
+        <Link href="/login">
+          <button className="bg-primary hover:bg-blue-500 bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition">
+            Go to Login
+          </button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <>      
+    <>
     <Navbar />
     <div className="min-h-screen bg-gray-100 p-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
-        
-        {/* ✅ Provide the form context here */}
-        <FormProvider {...formMethods}>
-          <form className="bg-white rounded-lg shadow-md p-6 space-y-6">
-            <InvoiceForm formMethods={formMethods} /> {/* ✅ Now useFormContext() will work! */}
-          </form>
-        </FormProvider>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          {formData ? (
-            <>
-              <InvoicePreview formData={formData} />
-              <div className="mt-6">
-                <DownloadButton formData={formData} />
-              </div>
-            </>
-          ) : (
-            <p className="text-center text-gray-500">
-              Fill the form and preview your invoice here.
-            </p>
-          )}
-        </div>
-      </div>
+      <NewInvoiceClient /> {/* ✅ moves client logic here */}
     </div>
     </>
   );

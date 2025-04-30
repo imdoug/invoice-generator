@@ -1,6 +1,6 @@
 "use client";
 
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 interface InvoiceItem {
   description: string;
@@ -21,12 +21,11 @@ interface InvoiceFormValues {
   issueDate?: string;
 }
 
-interface InvoiceFormProps {
-  formMethods: UseFormReturn<InvoiceFormValues>;
-}
 
-export default function InvoiceForm({ formMethods }: InvoiceFormProps) {
-  const { register, control, setValue, watch } = formMethods;
+
+export default function InvoiceForm() {
+  const { register, control, setValue, watch } = useFormContext<InvoiceFormValues>();
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "items",
