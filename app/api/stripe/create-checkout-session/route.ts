@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       customer_email: email,
       line_items: [
         {
-          price: "price_XXXXXXX", // 👈 replace with your Price ID
+          price: process.env.STRIPE_PRO_PLAN_PRICE_ID, // 👈 replace with your Price ID
           quantity: 1,
         },
       ],

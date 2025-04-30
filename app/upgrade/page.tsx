@@ -35,7 +35,7 @@ export default function UpgradePage() {
         <div className="text-center mt-8">
           <button
             onClick={handleUpgrade}
-            className="bg-primary hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition"
+            className="bg-primary hover:bg-blue-500 bg-blue-700 cursor-pointer text-white font-bold py-4 px-8 rounded-lg text-xl transition"
           >
             Upgrade for $9/month
           </button>

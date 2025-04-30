@@ -1,37 +1,78 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-interface DashboardContentProps {
-  invoices: any[];
-}
-
-export default function DashboardContent({ invoices }: DashboardContentProps) {
+export default function DashboardContent() {
+  const { data: session } = useSession();
   const router = useRouter();
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isPro, setIsPro] = useState(false);
 
-  const handleDelete = async (invoiceId: string) => {
-    const { error } = await supabase
-      .from("invoices")
-      .delete()
-      .eq("id", invoiceId);
 
-    if (error) {
-      console.error("Error deleting invoice:", error.message);
-      toast.error("Failed to delete invoice.");
-      return;
-    }
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      if (!session?.user?.email) return;
 
-    toast.success("Invoice deleted successfully!");
-    router.refresh(); // Refresh the page to reload invoices
-  };
+      // 1. Find the user_id based on email
+      const { data: user, error: userError } = await supabase
+        .from("users")
+        .select("id,is_pro")
+        .eq("email", session.user.email)
+        .single();
+
+      if (userError || !user) {
+        console.error("Error finding user:", userError?.message);
+        toast.error("User not found. Please log in again.");
+        router.push("/login");
+        return;
+      }
+
+      setIsPro(user.is_pro === true);
+      const userId = user.id;
+      console.log("User Data:", user);
+
+      // 2. Fetch all invoices belonging to this user
+      const { data: invoicesData, error: invoicesError } = await supabase
+        .from("invoices")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (invoicesError) {
+        console.error("Error fetching invoices:", invoicesError.message);
+        toast.error("Error loading invoices.");
+      } else {
+        setInvoices(invoicesData || []);
+      }
+
+      setLoading(false);
+    };
+
+    fetchInvoices();
+  }, [session, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Loading invoices...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
+      {isPro && (
+        <div className="inline-block mb-4 px-4 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full shadow-sm">
+          ✅ Pro Account
+        </div>
+      )}
         <h1 className="text-3xl font-bold mb-8 text-primary">Your Invoices</h1>
-
         {invoices.length === 0 ? (
           <p className="text-gray-600">No invoices found. Create your first invoice!</p>
         ) : (
@@ -69,11 +110,23 @@ export default function DashboardContent({ invoices }: DashboardContentProps) {
                     onClick={() => router.push(`/invoices/${invoice.id}/edit`)}
                     className="text-blue-600 hover:underline text-sm"
                   >
-                    Edit 
+                    Edit Invoice
                   </button>
 
                   <button
-                    onClick={() => handleDelete(invoice.id)}
+                    onClick={async () => {
+                      const { error } = await supabase
+                        .from("invoices")
+                        .delete()
+                        .eq("id", invoice.id);
+
+                      if (error) {
+                        toast.error("Failed to delete invoice.");
+                      } else {
+                        toast.success("Invoice deleted successfully!");
+                        setInvoices((prev) => prev.filter((inv) => inv.id !== invoice.id));
+                      }
+                    }}
                     className="text-red-500 hover:underline text-sm"
                   >
                     Delete

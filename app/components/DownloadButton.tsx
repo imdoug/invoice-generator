@@ -44,15 +44,18 @@ export default function DownloadButton({ formData }: DownloadButtonProps) {
     const userId = userData.id; // ✅ real user id from users table
 
     // Now save the invoice
+    console.log(formData)
     const { error } = await supabase.from("invoices").insert([
       {
         user_id: userId,
         invoice_number: generatedInvoiceNumber,
         issue_date: formData.issueDate || new Date().toISOString(),
         due_date: formData.dueDate || null,
+        business_name: formData.businessName,
         client_name: formData.clientName,
         client_address: formData.clientAddress,
         items: formData.items,
+        currency: formData.currency,
         total: formData.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
         notes: formData.notes || "",
       }

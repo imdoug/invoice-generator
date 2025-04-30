@@ -36,8 +36,6 @@ export default async function DashboardPage() {
 
   const userId = userData.id;
 
-  console.log("User ID:", userId);
-
   // 2. Fetch all invoices belonging to this user
   const { data: invoices, error: invoicesError } = await supabase
     .from("invoices")
@@ -45,7 +43,7 @@ export default async function DashboardPage() {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-    console.log("Invoices:", invoices);
+    // console.log("Invoices:", invoices);
   if (invoicesError) {
     console.error("Error fetching invoices:", invoicesError.message);
     return (

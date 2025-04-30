@@ -1,21 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react"; // mobile icons
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPro, setIsPro] = useState<boolean | null>(null);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push("/login");
   };
+  
+  useEffect(() => {
+    const fetchProStatus = async () => {
+      if (!session?.user?.email) return;
+  
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_pro")
+        .eq("email", session.user.email)
+        .single();
+  
+      if (error) {
+        console.error("Error checking Pro status:", error.message);
+        setIsPro(false); // fallback to free
+      } else {
+        setIsPro(data?.is_pro === true);
+      }
+    };
+  
+    fetchProStatus();
+  }, [session]);
 
   return (
     <nav className="bg-white shadow-md">
@@ -28,16 +51,13 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex space-x-6">
-            <Link href="/dashboard" className="text-gray-700 hover:text-primary font-semibold">
-              Dashboard
-            </Link>
 
             <Link href="/invoices/new" className="text-gray-700 hover:text-primary font-semibold">
               New Invoice
             </Link>
 
             {/* Show Upgrade link only if user is NOT Pro */}
-            {!session?.user?.is_pro && (
+            {isPro === false && (
               <Link href="/upgrade" className="text-blue-600 hover:text-blue-800 font-semibold">
                 Upgrade
               </Link>
@@ -83,7 +103,7 @@ export default function Navbar() {
             New Invoice
           </Link>
 
-          {!session?.user?.is_pro && (
+          {isPro === false  && (
             <Link
               href="/upgrade"
               onClick={() => setMenuOpen(false)}
