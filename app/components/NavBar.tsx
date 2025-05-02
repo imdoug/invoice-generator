@@ -13,6 +13,8 @@ export default function Navbar() {
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [invoiceCount, setInvoiceCount] = useState<number | null>(null);
+
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -20,24 +22,36 @@ export default function Navbar() {
   };
   
   useEffect(() => {
-    const fetchProStatus = async () => {
+    const fetchInvoiceCount = async () => {
       if (!session?.user?.email) return;
   
-      const { data, error } = await supabase
+      // Fetch user ID
+      const { data: user, error: userError } = await supabase
         .from("users")
-        .select("is_pro")
+        .select("id,is_pro")
         .eq("email", session.user.email)
         .single();
   
-      if (error) {
-        console.error("Error checking Pro status:", error.message);
-        setIsPro(false); // fallback to free
-      } else {
-        setIsPro(data?.is_pro === true);
+      if (user && user.id) {
+        const { count, error: countError } = await supabase
+          .from("invoices")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id);
+
+        // console.log("USER: ",user)
+        setIsPro(user.is_pro === true);
+        if (countError) {
+          console.error("Error counting invoices:", countError.message);
+        } else {
+          setInvoiceCount(count);
+        }
+      }
+      if(userError) {
+        console.error("Error fetching user ID:", userError.message);
       }
     };
   
-    fetchProStatus();
+    fetchInvoiceCount();
   }, [session]);
 
   return (
@@ -50,17 +64,26 @@ export default function Navbar() {
             InvoiceGen
           </Link>
 
+          <Link href="/profile" className="text-gray-700 hover:text-primary font-semibold">
+            Profile
+          </Link>
+
           <div className="hidden md:flex space-x-6">
 
-            <Link href="/invoices/new" className="text-gray-700 hover:text-primary font-semibold">
-              New Invoice
-            </Link>
-
             {/* Show Upgrade link only if user is NOT Pro */}
-            {isPro === false && (
-              <Link href="/upgrade" className="text-blue-600 hover:text-blue-800 font-semibold">
-                Upgrade
-              </Link>
+            {isPro !== null && invoiceCount !== null && (
+              isPro || invoiceCount < 3 ? (
+                <Link href="/invoices/new" className="text-gray-700 hover:text-primary font-semibold">
+                  New Invoice
+                </Link>
+              ) : (
+                <button
+                  onClick={() => router.push("/upgrade")}
+                  className="text-blue-600 hover:text-blue-800 font-semibold"
+                >
+                  Upgrade to Add More
+                </button>
+              )
             )}
           </div>
         </div>
@@ -96,23 +119,34 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/invoices/new"
+            href="/profile"
             onClick={() => setMenuOpen(false)}
             className="block text-gray-700 hover:text-primary font-semibold"
           >
-            New Invoice
+            Profile
           </Link>
 
-          {isPro === false  && (
-            <Link
-              href="/upgrade"
-              onClick={() => setMenuOpen(false)}
-              className="block text-blue-600 hover:text-blue-800 font-semibold"
-            >
-              Upgrade
-            </Link>
+          {isPro !== null && invoiceCount !== null && (
+            isPro || invoiceCount < 3 ? (
+              <Link
+                href="/invoices/new"
+                onClick={() => setMenuOpen(false)}
+                className="block text-gray-700 hover:text-primary font-semibold"
+              >
+                New Invoice
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/upgrade");
+                }}
+                className="block text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Upgrade to Add More
+              </button>
+            )
           )}
-
           <button
             onClick={() => {
               handleLogout();

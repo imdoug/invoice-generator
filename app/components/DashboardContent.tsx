@@ -106,13 +106,14 @@ export default function DashboardContent() {
                     View Details
                   </button>
 
+                  {/*  Edit  */}
                   <button
                     onClick={() => router.push(`/invoices/${invoice.id}/edit`)}
                     className="text-blue-600 hover:underline text-sm"
                   >
                     Edit Invoice
                   </button>
-
+                  {/*  Delete  */}
                   <button
                     onClick={async () => {
                       const { error } = await supabase

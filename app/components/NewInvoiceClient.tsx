@@ -15,6 +15,8 @@ interface InvoiceFormValues {
   businessName: string;
   clientName: string;
   clientAddress: string;
+  clientEmail: string;
+  paymentMethods: string;
   dueDate: string;
   items: InvoiceItem[];
   notes?: string;
@@ -41,6 +43,7 @@ export default function NewInvoiceClient() {
       businessName: "",
       clientName: "",
       clientAddress: "",
+      clientEmail: "",
       items: [{ description: "", quantity: 1, price: 0 }],
       notes: "",
       currency: "USD",
@@ -48,6 +51,7 @@ export default function NewInvoiceClient() {
       issueDate: todayStr,
       invoiceNumber: generateInvoiceNumber(),
       logo: undefined,
+      paymentMethods: "",
     },
   });
 

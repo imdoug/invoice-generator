@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+
 
 interface InvoiceItem {
   description: string;
@@ -14,12 +17,15 @@ interface InvoiceFormValues {
   businessName: string;
   clientName: string;
   clientAddress: string;
+  clientEmail: string;
   items: InvoiceItem[];
   notes?: string;
   currency: string;
   logo?: string;
   dueDate?: string;
   invoiceNumber?: string;
+  paymentMethods?: string;
+
 }
 
 interface InvoicePreviewProps {
@@ -28,8 +34,11 @@ interface InvoicePreviewProps {
 
 
 export default function InvoicePreview({ formData }: InvoicePreviewProps) {
+  const { data: session } = useSession();
+
+  const [profile, setProfile] = useState({ business_name: "", logo_url: "", address: "", phone_number: "" });
   const [invoiceNumber, setInvoiceNumber] = useState<string | undefined>(undefined);
-  const { businessName, clientName, clientAddress, items, notes, currency } = formData;
+  const { clientName, clientAddress, items, notes, currency, clientEmail } = formData;
 
   useEffect(() => {
     // ✅ Only generate on client after mount
@@ -39,6 +48,29 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
       setInvoiceNumber(formData.invoiceNumber);
     }
   }, [formData.invoiceNumber]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.user?.email) return;
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("users")
+        .select("business_name, logo_url, address, phone_number")
+        .eq("email", session.user.email)
+        .single();
+
+      if (data) setProfile(data);
+      console.log("Profile data:", data);
+      if (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, [session]);
 
   const subtotal = items.reduce((sum, item) => {
     const itemTotal = (item.quantity || 0) * (item.price || 0);
@@ -74,17 +106,17 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
   }
 
   return (
-    <div id="invoice-preview" className="bg-white shadow rounded p-6 w-full space-y-8">
+    <div id="invoice-preview" className="border p-6 rounded bg-white shadow space-y-6">
       
       {/* Header */}
       <div className="flex justify-between items-start">
         
         {/* Left: Logo + Business Info */}
         <div className="flex space-x-4 items-start">
-          {formData.logo && (
+          {profile.logo_url && (
             <div className="h-20 w-32 relative">
               <Image
-                src={formData.logo}
+                src={profile.logo_url}
                 alt="Business Logo"
                 fill
                 className="object-contain"
@@ -94,8 +126,9 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
           )}
 
           <div className="text-gray-800">
-            <h2 className="text-2xl font-bold">{businessName || "Your Business Name"}</h2>
-            <p className="text-sm mt-1">{clientAddress || "Your Address"}</p>
+            <h2 className="text-2xl font-bold">{profile.business_name || "Your Business Name"}</h2>
+            <p className="text-sm mt-1">{profile.address || "Your Address"}</p>
+            <p className="text-sm mt-1">{profile.phone_number || "(934)-883-328"}</p>
           </div>
         </div>
 
@@ -114,6 +147,7 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
         <h3 className="text-lg font-semibold mb-2 text-primary">Bill To:</h3>
         <p className="text-gray-800">{clientName || "Client Name"}</p>
         <p className="text-gray-600">{clientAddress || "Client Address"}</p>
+        <p className="text-gray-600">{clientEmail || "Client Email"}</p>
       </div>
 
       {/* Items */}
@@ -142,6 +176,10 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
 
       {/* Totals */}
       <div className="border-t pt-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-2 text-primary">Payment Methods</h3>
+          <p className="text-gray-800 p-2">{formData.paymentMethods || "Bank Transfer"}</p>
+        </div>
         <div className="flex justify-between font-semibold text-lg">
           <span>Subtotal:</span>
           <span>{formatCurrency(subtotal, currency)}</span>

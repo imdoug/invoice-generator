@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
@@ -67,6 +68,7 @@ export default function LoginPage() {
         >
           Sign In
         </button>
+        <p className="w-full text-center">Don&apos;t have an account yet?<Link  className=" text-blue-500" href="/register"> Register now.</Link></p>
       </form>
     </div>
   );
