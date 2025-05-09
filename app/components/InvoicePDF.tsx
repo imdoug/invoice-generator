@@ -12,6 +12,8 @@ interface InvoicePDFProps {
   businessName: string;
   clientName: string;
   clientAddress: string;
+  clientEmail: string; 
+  paymentMethods: string[];
   dueDate: string;
   items: InvoiceItem[];
   notes?: string;
@@ -55,7 +57,9 @@ export default function InvoicePDF({
   notes,
   currency,
   logo,
-  invoiceNumber
+  invoiceNumber,
+  paymentMethods,
+  clientEmail
 }: InvoicePDFProps) {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-US", {
@@ -85,6 +89,7 @@ export default function InvoicePDF({
         <View style={styles.section}>
           <Text style={{ fontSize: 14, marginBottom: 2 }}>Bill To:</Text>
           <Text>{clientName || "Client Name"}</Text>
+          <Text>{clientEmail || "Client Email"}</Text>
           <Text>{clientAddress || "Client Address"}</Text>
         </View>
 
@@ -119,6 +124,12 @@ export default function InvoicePDF({
         {notes && (
           <View style={styles.section}>
             <Text style={{ fontSize: 12, marginTop: 10 }}>Notes:</Text>
+            <Text>{notes}</Text>
+          </View>
+        )}
+        {paymentMethods && (
+          <View style={styles.section}>
+            <Text style={{ fontSize: 12, marginTop: 10 }}>Payment Methods:</Text>
             <Text>{notes}</Text>
           </View>
         )}

@@ -4,6 +4,21 @@ import { useForm, FormProvider, useWatch } from "react-hook-form";
 import InvoiceForm from "./InvoiceForm";
 import InvoicePreview from "./InvoicePreview";
 import DownloadButton from "./DownloadButton";
+import { useSession } from "next-auth/react";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      invoiceCount?: number;
+    };
+  }
+}
+import { useEffect, useState as useReactState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 interface InvoiceItem {
   description: string;
@@ -37,6 +52,15 @@ function generateInvoiceNumber() {
 
 export default function NewInvoiceClient() {
   const todayStr = new Date().toISOString().split("T")[0];
+  const router = useRouter();
+  const { data: session } = useSession();
+  const invoiceCount = session?.user?.invoiceCount;
+  const [profile, setProfile] = useState({
+    business_name: "",
+    logo_url: "",
+    address: "",
+    phone_number: "",
+  });
 
   const formMethods = useForm<InvoiceFormValues>({
     defaultValues: {
@@ -58,21 +82,67 @@ export default function NewInvoiceClient() {
   const formData = useWatch<InvoiceFormValues>({
     control: formMethods.control,
   });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.user?.email) return;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("business_name, logo_url, address, phone_number")
+        .eq("email", session.user.email)
+        .single();
+
+      if (data) setProfile(data);
+      console.log("Profile data:", data);
+      if (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+    console.log("Profile data:", profile);
+  }, [session]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
       <FormProvider {...formMethods}>
         <form className="bg-white rounded-lg shadow-md p-6 space-y-6">
-          <InvoiceForm formMethods={formMethods} />
+          <InvoiceForm formMethods={formMethods} profileData={profile} />
         </form>
       </FormProvider>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <InvoicePreview formData={formData as InvoiceFormValues} />
+        <InvoicePreview
+          formData={formData as InvoiceFormValues}
+          profileData={profile}
+        />
         <div className="mt-6">
-          <DownloadButton formData={formData} />
+          {invoiceCount && invoiceCount >= 3 ? (
+            <button
+              onClick={() => {
+                router.push("/upgrade");
+              }}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
+            >
+              Upgrade to Add More
+            </button>
+          ) : (
+            <DownloadButton formData={formData} profileData={profile} />
+          )}
         </div>
       </div>
     </div>
   );
+}
+// Removed the conflicting local useEffect function
+function useState(initialState: {
+  business_name: string;
+  logo_url: string;
+  address: string;
+  phone_number: string;
+}): [
+  typeof initialState,
+  React.Dispatch<React.SetStateAction<typeof initialState>>
+] {
+  return useReactState(initialState);
 }

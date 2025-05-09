@@ -30,6 +30,8 @@ interface InvoiceFormValues {
 
 interface InvoicePreviewProps {
   formData: InvoiceFormValues;
+  profileData: { business_name: string; logo_url: string; address: string; phone_number: string };
+
 }
 
 

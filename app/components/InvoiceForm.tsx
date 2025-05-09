@@ -8,6 +8,7 @@ interface InvoiceItem {
   price: number;
 }
 
+
 interface InvoiceFormValues {
   businessName: string;
   clientName: string;
@@ -26,7 +27,7 @@ interface InvoiceFormValues {
 
 
 export default function InvoiceForm() {
-  const { register, control, setValue, watch } = useFormContext<InvoiceFormValues>();
+  const { register, control } = useFormContext<InvoiceFormValues>();
 
   const { fields, append, remove } = useFieldArray({
     control,

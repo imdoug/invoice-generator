@@ -9,9 +9,11 @@ import InvoicePDF from "./InvoicePDF";
 
 interface DownloadButtonProps {
   formData: any;
+  profileData: { business_name: string; logo_url: string; address: string; phone_number: string };
+
 }
 
-export default function DownloadButton({ formData }: DownloadButtonProps) {
+export default function DownloadButton({ formData, profileData }: DownloadButtonProps) {
   const { data: session } = useSession();
 
   const handleDownload = async () => {
@@ -51,9 +53,12 @@ export default function DownloadButton({ formData }: DownloadButtonProps) {
         invoice_number: generatedInvoiceNumber,
         issue_date: formData.issueDate || new Date().toISOString(),
         due_date: formData.dueDate || null,
-        business_name: formData.businessName,
+        logo_url: profileData.logo_url,
+        business_name: profileData.business_name,
         client_name: formData.clientName,
         client_address: formData.clientAddress,
+        client_email: formData.clientEmail, 
+        payment_methods: formData.paymentMethods,
         items: formData.items,
         currency: formData.currency,
         total: formData.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
@@ -72,14 +77,16 @@ export default function DownloadButton({ formData }: DownloadButtonProps) {
     // Now download PDF
     const doc = (
       <InvoicePDF
-        businessName={formData.businessName}
+        businessName={profileData.business_name}
+        logo={profileData.logo_url}
         clientName={formData.clientName}
         clientAddress={formData.clientAddress}
+        clientEmail={formData.clientEmail}
         dueDate={formData.dueDate}
         items={formData.items}
         notes={formData.notes}
+        paymentMethods={formData.paymentMethods}
         currency={formData.currency}
-        logo={formData.logo}
         invoiceNumber={formData.invoiceNumber}
         issueDate={formData.issueDate}
       />
