@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 12 },
   header: { fontSize: 20, marginBottom: 10, fontWeight: "bold" },
   smallText: { fontSize: 10, color: "gray" },
-  table: { display: "table", width: "auto", marginTop: 10 },
+  table: { display: "flex", flexDirection: "column", width: "auto", marginTop: 10 },
   tableRow: { flexDirection: "row", borderBottom: "1 solid #eee", paddingBottom: 5, paddingTop: 5 },
   tableColDesc: { width: "60%" },
   tableColQty: { width: "20%", textAlign: "center" },
@@ -75,6 +75,7 @@ export default function InvoicePDF({
         {/* Logo */}
         {logo && (
             <View style={{ alignItems: "center", marginBottom: 20 }}>
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
                 <Image style={styles.logo} src={logo} />
             </View>
         )}

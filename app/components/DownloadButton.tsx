@@ -8,6 +8,7 @@ import { saveAs } from "file-saver";
 import InvoicePDF from "./InvoicePDF";
 
 interface DownloadButtonProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formData: any;
   profileData: { business_name: string; logo_url: string; address: string; phone_number: string };
 
@@ -61,6 +62,7 @@ export default function DownloadButton({ formData, profileData }: DownloadButton
         payment_methods: formData.paymentMethods,
         items: formData.items,
         currency: formData.currency,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         total: formData.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
         notes: formData.notes || "",
       }

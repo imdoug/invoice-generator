@@ -1,10 +1,8 @@
-import NextAuth from "next-auth";
+// app/api/auth/authOptions.ts
 import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "@/lib/supabaseClient";
 import bcrypt from "bcryptjs";
 import { RateLimiterMemory } from "rate-limiter-flexible";
-// ✅ clean import
-
 
 const loginRateLimiter = new RateLimiterMemory({
   keyPrefix: "login_fail",
@@ -12,7 +10,7 @@ const loginRateLimiter = new RateLimiterMemory({
   duration: 60,
 });
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -46,15 +44,15 @@ const handler = NextAuth({
             name: userData.name,
             is_pro: userData.is_pro,
           };
-        } catch (rateError) {
-          console.warn("🚫 Rate limit hit:", rateError);
+        } catch {
           throw new Error("Too many login attempts. Try again later.");
         }
       },
     }),
   ],
   callbacks: {
-    async session({ session }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session }: { session: any }) {
       if (!session?.user?.email) return session;
 
       const { data: user } = await supabase
@@ -85,7 +83,4 @@ const handler = NextAuth({
     signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
-
-// ✅ ✅ ✅ THIS IS ALL YOU EXPORT
-export { handler as GET, handler as POST };
+};

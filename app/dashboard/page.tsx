@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { supabase } from "@/lib/supabaseClient";
 import DashboardContent from "@/app/components/DashboardContent";
 import { notFound } from "next/navigation";
@@ -58,29 +58,11 @@ export default async function DashboardPage() {
     return notFound();
   }
 
-  const userId = userData.id;
-
-  // 2. Fetch all invoices belonging to this user
-  const { data: invoices, error: invoicesError } = await supabase
-    .from("invoices")
-    .select()
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-    // console.log("Invoices:", invoices);
-  if (invoicesError) {
-    console.error("Error fetching invoices:", invoicesError.message);
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Error loading invoices.</p>
-      </div>
-    );
-  }
 
   return (
     <>
       <Navbar/>
-      <DashboardContent invoices={invoices || []} />
+      <DashboardContent />
     </>
   );
 }

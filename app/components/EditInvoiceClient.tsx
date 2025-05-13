@@ -14,12 +14,14 @@ type InvoiceFormValues = {
   invoiceNumber: string;
   issueDate: string;
 };
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import InvoiceForm from "./InvoiceForm";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function EditInvoiceClient({ invoice }: { invoice: any }) {
   const router = useRouter();
 

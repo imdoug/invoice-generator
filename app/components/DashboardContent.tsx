@@ -9,7 +9,16 @@ import { toast } from "react-hot-toast";
 export default function DashboardContent() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [invoices, setInvoices] = useState<any[]>([]);
+  interface Invoice {
+    id: string;
+    invoice_number: string;
+    client_name: string;
+    issue_date: string | null;
+    total: number | null;
+    currency: string | null;
+  }
+  
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPro, setIsPro] = useState(false);
 

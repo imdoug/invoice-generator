@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
+    
+  } catch (err: unknown) {
     console.error(err);
     return new NextResponse("Something went wrong", { status: 500 });
   }

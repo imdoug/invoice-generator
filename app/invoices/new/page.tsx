@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import Navbar from "@/app/components/NavBar";
 import NewInvoiceClient from "@/app/components/NewInvoiceClient"; // 👈 new client component
 import Link from "next/link";

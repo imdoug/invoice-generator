@@ -100,14 +100,13 @@ export default function NewInvoiceClient() {
     };
 
     fetchProfile();
-    console.log("Profile data:", profile);
   }, [session]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
       <FormProvider {...formMethods}>
         <form className="bg-white rounded-lg shadow-md p-6 space-y-6">
-          <InvoiceForm formMethods={formMethods} profileData={profile} />
+          <InvoiceForm  />
         </form>
       </FormProvider>
 

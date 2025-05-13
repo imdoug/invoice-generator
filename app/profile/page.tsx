@@ -162,7 +162,7 @@ export default function ProfilePage() {
                     /[^a-z0-9]/gi,
                     "-"
                   )}-logo.${fileExt}`;
-                  const { data, error } = await supabase.storage
+                  const { error } = await supabase.storage
                     .from("logos") // make sure this bucket exists in Supabase
                     .upload(fileName, file, { upsert: true });
 
