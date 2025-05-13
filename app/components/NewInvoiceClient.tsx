@@ -3,7 +3,6 @@
 import { useForm, FormProvider, useWatch } from "react-hook-form";
 import InvoiceForm from "./InvoiceForm";
 import InvoicePreview from "./InvoicePreview";
-import DownloadButton from "./DownloadButton";
 import { useSession } from "next-auth/react";
 
 declare module "next-auth" {
@@ -19,6 +18,7 @@ declare module "next-auth" {
 import { useEffect, useState as useReactState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface InvoiceItem {
   description: string;
@@ -60,6 +60,7 @@ export default function NewInvoiceClient() {
     logo_url: "",
     address: "",
     phone_number: "",
+    id: "",
   });
 
   const formMethods = useForm<InvoiceFormValues>({
@@ -88,7 +89,7 @@ export default function NewInvoiceClient() {
 
       const { data, error } = await supabase
         .from("users")
-        .select("business_name, logo_url, address, phone_number")
+        .select("business_name, logo_url, address, phone_number, id")
         .eq("email", session.user.email)
         .single();
 
@@ -102,11 +103,51 @@ export default function NewInvoiceClient() {
     fetchProfile();
   }, [session]);
 
+  const generatedInvoiceNumber =
+    formData.invoiceNumber || generateInvoiceNumber();
+  const handleSaveInvoice = async () => {
+    const { error } = await supabase.from("invoices").insert([
+      {
+        user_id: profile.id,
+        invoice_number: generatedInvoiceNumber,
+        issue_date: formData.issueDate || new Date().toISOString(),
+        due_date: formData.dueDate || null,
+        logo_url: profile.logo_url,
+        business_name: profile.business_name,
+        client_name: formData.clientName,
+        client_address: formData.clientAddress,
+        client_email: formData.clientEmail,
+        payment_methods: formData.paymentMethods,
+        items: formData.items,
+        currency: formData.currency,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        total: (formData.items || []).reduce(
+          (sum: number, item: unknown) => {
+            const invoiceItem = item as InvoiceItem;
+            return sum + invoiceItem.price * invoiceItem.quantity;
+          },
+          0
+        ),
+        notes: formData.notes || "",
+      },
+    ]);
+
+    if (error) {
+      console.error("Error saving invoice:", error.message);
+      toast.error("Failed to save invoice!");
+      return;
+    }
+    toast.success("Invoice saved!");
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 500);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
       <FormProvider {...formMethods}>
         <form className="bg-white rounded-lg shadow-md p-6 space-y-6">
-          <InvoiceForm  />
+          <InvoiceForm />
         </form>
       </FormProvider>
 
@@ -126,7 +167,13 @@ export default function NewInvoiceClient() {
               Upgrade to Add More
             </button>
           ) : (
-            <DownloadButton formData={formData} profileData={profile} />
+            <button
+              onClick={handleSaveInvoice}
+              type="button"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
+            >
+              Save invoice
+            </button>
           )}
         </div>
       </div>
@@ -135,6 +182,7 @@ export default function NewInvoiceClient() {
 }
 // Removed the conflicting local useEffect function
 function useState(initialState: {
+  id: unknown;
   business_name: string;
   logo_url: string;
   address: string;
