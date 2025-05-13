@@ -6,7 +6,6 @@ import { toast } from "react-hot-toast";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import InvoicePDF from "./InvoicePDF";
-import { useEffect } from "react";
 
 interface DownloadButtonProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,10 +17,6 @@ interface DownloadButtonProps {
 export default function DownloadButton({ formData, profileData }: DownloadButtonProps) {
   const { data: session } = useSession();
 
-  useEffect(() => {
-    console.log("User:", profileData);
-    console.log("data:", formData);
-  })
 
   const handleDownload = async () => {
     if (!session?.user?.email) {

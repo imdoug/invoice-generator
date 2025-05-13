@@ -56,7 +56,6 @@ export default function DashboardContent() {
         address: user.address,
         phone_number: user.phone_number,
       });
-      console.log("User Data:", user);
 
       // 2. Fetch all invoices belonging to this user
       const { data: invoicesData, error: invoicesError } = await supabase

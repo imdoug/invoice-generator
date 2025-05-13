@@ -35,8 +35,7 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const customerEmail = session.customer_email;
-    console.log("Customer email:", customerEmail);
-
+    
     if (customerEmail) {
       // Find user in Supabase and mark them as Pro
       const { data: user, error: userError } = await supabase

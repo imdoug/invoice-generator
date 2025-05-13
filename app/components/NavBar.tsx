@@ -38,7 +38,6 @@ export default function Navbar() {
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id);
 
-        // console.log("USER: ",user)
         setIsPro(user.is_pro === true);
         if (countError) {
           console.error("Error counting invoices:", countError.message);

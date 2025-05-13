@@ -29,14 +29,11 @@ export default function ProfilePage() {
     const fetchUser = async () => {
       if (!session?.user?.email) return;
 
-      console.log("SESSION: ", session);
       const { data, error } = await supabase
         .from("users")
         .select("name, phone_number, business_name, address, logo_url")
         .eq("email", session.user.email)
         .single();
-
-      console.log("USER: ", data);
 
       if (data) setForm(data);
       if (error) {
@@ -167,8 +164,8 @@ export default function ProfilePage() {
                     .upload(fileName, file, { upsert: true });
 
                   if (error) {
-                    // console.log("ERROR: ", error);
-                    // toast.error("Failed to upload logo.");
+                    console.log("ERROR: ", error);
+                    toast.error("Failed to upload logo.");
                   } else {
                     const { data: publicUrl } = supabase.storage
                       .from("logos")
