@@ -2,11 +2,11 @@
 
 import { useSession } from "next-auth/react";
 import { supabase } from "@/lib/supabaseClient";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import InvoicePDF from "./InvoicePDF";
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 
 interface DownloadButtonProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
