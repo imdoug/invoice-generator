@@ -2,10 +2,11 @@
 
 import { useSession } from "next-auth/react";
 import { supabase } from "@/lib/supabaseClient";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import InvoicePDF from "./InvoicePDF";
+import { use, useEffect } from "react";
 
 interface DownloadButtonProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,6 +17,11 @@ interface DownloadButtonProps {
 
 export default function DownloadButton({ formData, profileData }: DownloadButtonProps) {
   const { data: session } = useSession();
+
+  useEffect(() => {
+    console.log("User:", profileData);
+    console.log("data:", formData);
+  })
 
   const handleDownload = async () => {
     if (!session?.user?.email) {
@@ -35,61 +41,21 @@ export default function DownloadButton({ formData, profileData }: DownloadButton
       toast.error("Could not find user in database.");
       return;
     }
-    function generateInvoiceNumber() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const randomPart = Math.floor(1000 + Math.random() * 9000);
-      return `INV-${year}-${randomPart}`;
-    }
-    const generatedInvoiceNumber = formData.invoiceNumber || generateInvoiceNumber();
-
-
-    const userId = userData.id; // ✅ real user id from users table
-
-    // Now save the invoice
-    console.log(formData)
-    const { error } = await supabase.from("invoices").insert([
-      {
-        user_id: userId,
-        invoice_number: generatedInvoiceNumber,
-        issue_date: formData.issueDate || new Date().toISOString(),
-        due_date: formData.dueDate || null,
-        logo_url: profileData.logo_url,
-        business_name: profileData.business_name,
-        client_name: formData.clientName,
-        client_address: formData.clientAddress,
-        client_email: formData.clientEmail, 
-        payment_methods: formData.paymentMethods,
-        items: formData.items,
-        currency: formData.currency,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        total: formData.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
-        notes: formData.notes || "",
-      }
-    ]);
-
-    if (error) {
-      console.error("Error saving invoice:", error.message);
-      toast.error("Failed to save invoice!");
-      return;
-    }
-
-    toast.success("Invoice saved!");
 
     // Now download PDF
     const doc = (
       <InvoicePDF
         businessName={profileData.business_name}
         logo={profileData.logo_url}
-        clientName={formData.clientName}
-        clientAddress={formData.clientAddress}
-        clientEmail={formData.clientEmail}
-        dueDate={formData.dueDate}
+        clientName={formData.client_name}
+        clientAddress={formData.client_address}
+        clientEmail={formData.client_email}
+        dueDate={formData.due_date}
         items={formData.items}
         notes={formData.notes}
-        paymentMethods={formData.paymentMethods}
+        paymentMethods={formData.payment_methods}
         currency={formData.currency}
-        invoiceNumber={formData.invoiceNumber}
+        invoiceNumber={formData.invoice_number}
         issueDate={formData.issueDate}
       />
     );
@@ -103,15 +69,16 @@ export default function DownloadButton({ formData, profileData }: DownloadButton
     const filename = `Invoice-${safeClientName}-${today.toISOString().split("T")[0]}.pdf`;
 
     saveAs(blob, filename);
+    toast.success("Invoice downloaded successfully!");
   };
 
   return (
     <button
       onClick={handleDownload}
       type="button"
-      className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
+      className="cursor-pointer bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
     >
-      Save and Download Invoice
+      Download
     </button>
   );
 }

@@ -24,6 +24,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   if (error || !invoice) {
     return notFound();
   }
+  console.log("Invoice Data:", invoice);
 
   return <EditInvoiceClient invoice={invoice} />;
 }

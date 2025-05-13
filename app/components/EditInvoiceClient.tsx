@@ -10,8 +10,10 @@ type InvoiceFormValues = {
   items: Array<{ description: string; quantity: number; price: number }>;
   notes: string;
   currency: string;
+  clientEmail: string;
   logo: string;
   invoiceNumber: string;
+  paymentMethods: string,
   issueDate: string;
 };
 
@@ -32,6 +34,7 @@ export default function EditInvoiceClient({ invoice }: { invoice: any }) {
       formMethods.reset({
         businessName: invoice.business_name,
         clientName: invoice.client_name,
+        clientEmail: invoice.client_email,
         clientAddress: invoice.client_address,
         dueDate: invoice.due_date,
         items: invoice.items,
@@ -39,6 +42,7 @@ export default function EditInvoiceClient({ invoice }: { invoice: any }) {
         currency: invoice.currency,
         logo: invoice.logo,
         invoiceNumber: invoice.invoice_number,
+        paymentMethods: invoice.payment_methods,
         issueDate: invoice.issue_date,
       });
     }
@@ -56,12 +60,14 @@ export default function EditInvoiceClient({ invoice }: { invoice: any }) {
         business_name: data.businessName,
         client_name: data.clientName,
         client_address: data.clientAddress,
+        client_email: invoice.client_email,
         due_date: data.dueDate,
         items: data.items,
         notes: data.notes,
         currency: data.currency,
         logo: data.logo,
         invoice_number: data.invoiceNumber,
+        payment_methods: invoice.payment_methods,
         issue_date: data.issueDate,
         total: calculatedTotal, // ✅ add this line
       })

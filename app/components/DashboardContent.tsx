@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import DownloadButton from "./DownloadButton";
 
 export default function DashboardContent() {
   const { data: session } = useSession();
@@ -21,6 +22,12 @@ export default function DashboardContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPro, setIsPro] = useState(false);
+  const [user, setUser] = useState<{
+    business_name: string | null;
+    logo_url: string | null;
+    address: string | null;
+    phone_number: string | null;
+  } | null>(null);
 
 
   useEffect(() => {
@@ -30,7 +37,7 @@ export default function DashboardContent() {
       // 1. Find the user_id based on email
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id,is_pro")
+        .select("id,is_pro, business_name,logo_url,address,phone_number")
         .eq("email", session.user.email)
         .single();
 
@@ -43,6 +50,12 @@ export default function DashboardContent() {
 
       setIsPro(user.is_pro === true);
       const userId = user.id;
+      setUser({
+        business_name: user.business_name,
+        logo_url: user.logo_url,
+        address: user.address,
+        phone_number: user.phone_number,
+      });
       console.log("User Data:", user);
 
       // 2. Fetch all invoices belonging to this user
@@ -122,6 +135,18 @@ export default function DashboardContent() {
                   >
                     Edit Invoice
                   </button>
+                  {/*  Download  */}
+                  {user && (
+                    <DownloadButton
+                      profileData={{
+                        business_name: user.business_name || "",
+                        logo_url: user.logo_url || "",
+                        address: user.address || "",
+                        phone_number: user.phone_number || "",
+                      }}
+                      formData={invoice}
+                    />
+                  )}
                   {/*  Delete  */}
                   <button
                     onClick={async () => {
