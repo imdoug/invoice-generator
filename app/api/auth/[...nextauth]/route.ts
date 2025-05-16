@@ -59,11 +59,12 @@ const handler = NextAuth({
 
       const { data: user } = await supabase
         .from("users")
-        .select("id")
+        .select("id, is_pro")
         .eq("email", session.user.email)
         .single();
 
       let invoiceCount = 0;
+      
       if (user?.id) {
         const { count } = await supabase
           .from("invoices")
@@ -77,6 +78,7 @@ const handler = NextAuth({
         user: {
           ...session.user,
           invoiceCount,
+          is_pro: user?.is_pro,
         },
       };
     },

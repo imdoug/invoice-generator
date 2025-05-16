@@ -32,6 +32,7 @@ export default function DashboardContent() {
 
 
   useEffect(() => {
+    console.log("Session:", session);
     const fetchInvoices = async () => {
       if (!session?.user?.email) return;
 
@@ -50,6 +51,7 @@ export default function DashboardContent() {
       }
 
       setIsPro(user.is_pro === true);
+      console.log("User:", user.is_pro === true);
       const userId = user.id;
       setUser({
         business_name: user.business_name,
@@ -117,7 +119,7 @@ export default function DashboardContent() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <h1 className="text-3xl font-bold text-primary">Your Invoices</h1>
 
-          {isPro && <ExportCSVButton />}
+          {isPro && ( <ExportCSVButton /> )}
         </div>
         {invoices.length === 0 ? (
           <p className="text-gray-600">No invoices found. Create your first invoice!</p>
