@@ -51,8 +51,7 @@ export default function DownloadButton({ formData, profileData }: DownloadButton
         paymentMethods={formData.payment_methods}
         currency={formData.currency}
         invoiceNumber={formData.invoice_number}
-        issueDate={formData.issueDate}
-      />
+        issueDate={formData.issueDate} address={""} phone={""}      />
     );
 
     const generatedPdf = pdf();

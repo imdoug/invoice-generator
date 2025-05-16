@@ -59,7 +59,6 @@ export default function ExportCSVButton() {
     document.body.removeChild(link);
   };
 
-  console.log("Session:", session);
   if (!session?.user || !("is_pro" in session.user) || !session.user.is_pro) return null;
 
   return (

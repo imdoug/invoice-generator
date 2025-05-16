@@ -10,17 +10,19 @@ interface InvoiceItem {
 
 interface InvoicePDFProps {
   businessName: string;
+  logo: string;
+  address: string; // Added address property
+  phone: string;
+  invoiceNumber?: string;
+  issueDate?: string;
+  dueDate?: string;
   clientName: string;
+  clientEmail: string;
   clientAddress: string;
-  clientEmail: string; 
-  paymentMethods: string[];
-  dueDate: string;
-  items: InvoiceItem[];
+  items: Array<InvoiceItem>;
   notes?: string;
-  currency: string;
-  logo?: string; 
-  invoiceNumber: string;
-  issueDate: string; 
+  currency?: string; // Added currency property
+  paymentMethods?: string; // Added paymentMethods property
 }
 
 const styles = StyleSheet.create({
@@ -131,12 +133,12 @@ export default function InvoicePDF({
         {paymentMethods && (
           <View style={styles.section}>
             <Text style={{ fontSize: 12, marginTop: 10 }}>Payment Methods:</Text>
-            <Text>{notes}</Text>
+            <Text>{paymentMethods}</Text>
           </View>
         )}
         <View style={styles.footer}>
             <Text>Thank you for your business!</Text>
-            <Text style={styles.smallText}>If you have any questions, contact us at support@yourcompany.com</Text>
+            <Text style={styles.smallText}>If you have any questions, contact us at invoices@makewondr.com</Text>
         </View>
       </Page>
     </Document>

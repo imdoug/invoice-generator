@@ -7,11 +7,17 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import DownloadButton from "./DownloadButton";
 import ExportCSVButton from "./ExportCsvButton";
+import SendInvoiceButton from "./SendInvoiceButton";
 
 export default function DashboardContent() {
   const { data: session } = useSession();
   const router = useRouter();
   interface Invoice {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    items: any;
+    client_email: string;
+    client_address: string;
+    payment_methods: string;
     id: string;
     invoice_number: string;
     client_name: string;
@@ -32,7 +38,6 @@ export default function DashboardContent() {
 
 
   useEffect(() => {
-    console.log("Session:", session);
     const fetchInvoices = async () => {
       if (!session?.user?.email) return;
 
@@ -51,7 +56,6 @@ export default function DashboardContent() {
       }
 
       setIsPro(user.is_pro === true);
-      console.log("User:", user.is_pro === true);
       const userId = user.id;
       setUser({
         business_name: user.business_name,
@@ -161,18 +165,6 @@ export default function DashboardContent() {
                   >
                     Edit Invoice
                   </button>
-                  {/*  Download  */}
-                  {user  && (
-                    <DownloadButton
-                      profileData={{
-                        business_name: user.business_name || "",
-                        logo_url: user.logo_url || "",
-                        address: user.address || "",
-                        phone_number: user.phone_number || "",
-                      }}
-                      formData={invoice}
-                    />
-                  )}
                   {/*  Delete  */}
                   <button
                     onClick={async () => {
@@ -192,6 +184,42 @@ export default function DashboardContent() {
                   >
                     Delete
                   </button>
+                </div>
+                <div className="flex justify-between items-center pt-4 border-t">
+                  {/*  Download  */}
+                  {user  && (
+                    <>
+                    <DownloadButton
+                      profileData={{
+                        business_name: user.business_name || "",
+                        logo_url: user.logo_url || "",
+                        address: user.address || "",
+                        phone_number: user.phone_number || "",
+                      }}
+                      formData={invoice}
+                    />
+                    <SendInvoiceButton 
+                      formData={{
+                        clientName: invoice.client_name,
+                        clientEmail: invoice.client_email, // Add logic to fetch or set client email
+                        clientAddress: invoice.client_address, // Add logic to fetch or set client address
+                        paymentMethods: invoice.payment_methods, 
+                        items: [...invoice.items], // Add logic to fetch or set items
+                        invoiceNumber: invoice.invoice_number,
+                        issueDate: invoice.issue_date ?? undefined,
+                        total: invoice.total ?? undefined,
+                        currency: invoice.currency || "USD",
+                      }}
+                      profileData={{
+                        business_name: user.business_name || "",
+                        logo_url: user.logo_url || "",
+                        address: user.address || "",
+                        phone_number: user.phone_number || "",
+                      }} 
+                    />
+                    </>
+
+                  )}
                 </div>
               </div>
             ))}
