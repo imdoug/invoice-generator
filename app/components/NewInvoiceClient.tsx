@@ -61,6 +61,7 @@ export default function NewInvoiceClient() {
     address: "",
     phone_number: "",
     id: "",
+    isPro: false
   });
 
   const formMethods = useForm<InvoiceFormValues>({
@@ -89,11 +90,20 @@ export default function NewInvoiceClient() {
 
       const { data, error } = await supabase
         .from("users")
-        .select("business_name, logo_url, address, phone_number, id")
+        .select("business_name, is_pro, logo_url, address, phone_number, id")
         .eq("email", session.user.email)
         .single();
 
-      if (data) setProfile(data);
+      if (data) {
+        setProfile({
+          business_name: data.business_name,
+          logo_url: data.logo_url,
+          address: data.address,
+          phone_number: data.phone_number,
+          id: data.id,
+          isPro: data.is_pro,
+        });
+      }
       console.log("Profile data:", data);
       if (error) {
         console.error("Error fetching profile:", error);
@@ -157,7 +167,7 @@ export default function NewInvoiceClient() {
           profileData={profile}
         />
         <div className="mt-6">
-          {invoiceCount && invoiceCount >= 3 ? (
+          {invoiceCount && invoiceCount >= 3  && !profile.isPro ? (
             <button
               onClick={() => {
                 router.push("/upgrade");
@@ -187,6 +197,7 @@ function useState(initialState: {
   logo_url: string;
   address: string;
   phone_number: string;
+  isPro: boolean;
 }): [
   typeof initialState,
   React.Dispatch<React.SetStateAction<typeof initialState>>

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import DownloadButton from "./DownloadButton";
+import ExportCSVButton from "./ExportCsvButton";
 
 export default function DashboardContent() {
   const { data: session } = useSession();
@@ -113,7 +114,11 @@ export default function DashboardContent() {
           ✅ Pro Account
         </div>
       )}
-        <h1 className="text-3xl font-bold mb-8 text-primary">Your Invoices</h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <h1 className="text-3xl font-bold text-primary">Your Invoices</h1>
+
+          {isPro && <ExportCSVButton />}
+        </div>
         {invoices.length === 0 ? (
           <p className="text-gray-600">No invoices found. Create your first invoice!</p>
         ) : (
@@ -155,7 +160,7 @@ export default function DashboardContent() {
                     Edit Invoice
                   </button>
                   {/*  Download  */}
-                  {user && (
+                  {user  && (
                     <DownloadButton
                       profileData={{
                         business_name: user.business_name || "",
