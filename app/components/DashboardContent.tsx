@@ -8,6 +8,10 @@ import { toast } from "react-hot-toast";
 import DownloadButton from "./DownloadButton";
 import ExportCSVButton from "./ExportCsvButton";
 import SendInvoiceButton from "./SendInvoiceButton";
+import CombinedAnalyticsChart from "./CombinedAnalyticsChart";
+
+
+
 
 export default function DashboardContent() {
   const { data: session } = useSession();
@@ -111,6 +115,24 @@ export default function DashboardContent() {
     </div>
     );
   }
+  const rawCombined = invoices
+  .filter(i => i.issue_date && i.total)
+  .map(i => ({
+    day: new Date(i.issue_date!).toISOString().slice(0, 10), // "2025-05-17"
+    total_usd: i.total ?? 0,
+    invoice_count: 1,
+  }))
+  .reduce((acc, curr) => {
+    const found = acc.find(item => item.day === curr.day);
+    if (found) {
+      found.total_usd += curr.total_usd;
+      found.invoice_count += 1;
+    } else {
+      acc.push({ ...curr });
+    }
+    return acc;
+  }, [] as { day: string; total_usd: number; invoice_count: number }[]);
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -125,6 +147,9 @@ export default function DashboardContent() {
 
           {isPro && ( <ExportCSVButton /> )}
         </div>
+        {isPro && invoices.length > 0 && (
+          <CombinedAnalyticsChart data={rawCombined} />
+          )}
         {invoices.length === 0 ? (
           <p className="text-gray-600">No invoices found. Create your first invoice!</p>
         ) : (
