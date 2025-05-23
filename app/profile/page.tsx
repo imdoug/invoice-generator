@@ -23,6 +23,7 @@ export default function ProfilePage() {
     business_name: "",
     address: "",
     logo_url: "",
+    profile_complete: false,
   });
 
   useEffect(() => {
@@ -31,11 +32,18 @@ export default function ProfilePage() {
 
       const { data, error } = await supabase
         .from("users")
-        .select("name, phone_number, business_name, address, logo_url")
+        .select("name, phone_number, business_name, address, logo_url, profile_complete")
         .eq("email", session.user.email)
         .single();
 
-      if (data) setForm(data);
+      if (data) setForm({    
+        name: data.name ?? "",
+        phone_number: data.phone_number ?? "",
+        business_name: data.business_name ?? "",
+        address: data.address ?? "",
+        logo_url: data.logo_url ?? "",
+        profile_complete: data.profile_complete ?? false 
+      });
       if (error) {
         toast.error("Failed to fetch user data.");
       }
@@ -50,7 +58,13 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let profile_complete
+    const isComplete = form.name && form.phone_number && form.address && form.business_name;
 
+    if(isComplete){
+      profile_complete = true
+      form.profile_complete = profile_complete
+    }
     const { error } = await supabase
       .from("users")
       .update(form)

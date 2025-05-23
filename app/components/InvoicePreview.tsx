@@ -65,7 +65,6 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
         .single();
 
       if (data) setProfile(data);
-      console.log("Profile data:", data);
       if (error) {
         console.error("Error fetching profile:", error);
       }
@@ -108,10 +107,10 @@ export default function InvoicePreview({ formData }: InvoicePreviewProps) {
   }
 
   return (
-    <div id="invoice-preview" className="border p-6 rounded bg-white shadow space-y-6">
+    <div id="invoice-preview" className="max-w-full sm:max-w-3xl mx-auto border p-6 rounded bg-white shadow space-y-6">
       
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         
         {/* Left: Logo + Business Info */}
         <div className="flex space-x-4 items-start">

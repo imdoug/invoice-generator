@@ -7,10 +7,13 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import bcrypt from "bcryptjs";
+import { addMonths } from "date-fns";
+
 
 
 export default function RegisterPage() {
   const router = useRouter();
+  const trialEndsAt = addMonths(new Date(), 1).toISOString();
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -38,7 +41,7 @@ export default function RegisterPage() {
 
     const { data, error } = await supabase
       .from("users")
-      .insert([{ email, name, password_hash: passwordHash }])
+      .insert([{ email, name, password_hash: passwordHash,trial_ends_at: trialEndsAt, is_pro: true, }])
       .select()
       .single();
 

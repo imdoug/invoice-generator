@@ -9,6 +9,8 @@ import DownloadButton from "./DownloadButton";
 import ExportCSVButton from "./ExportCsvButton";
 import SendInvoiceButton from "./SendInvoiceButton";
 import CombinedAnalyticsChart from "./CombinedAnalyticsChart";
+import { differenceInDays, isAfter } from "date-fns";
+
 
 
 
@@ -38,17 +40,19 @@ export default function DashboardContent() {
     logo_url: string | null;
     address: string | null;
     phone_number: string | null;
+    trial_ends_at: string | null;
   } | null>(null);
 
 
   useEffect(() => {
     const fetchInvoices = async () => {
       if (!session?.user?.email) return;
+      const now = new Date();
 
       // 1. Find the user_id based on email
       const { data: user, error: userError } = await supabase
         .from("users")
-        .select("id,is_pro, business_name,logo_url,address,phone_number")
+        .select("id,is_pro, business_name,logo_url,address,phone_number, trial_ends_at")
         .eq("email", session.user.email)
         .single();
 
@@ -59,13 +63,19 @@ export default function DashboardContent() {
         return;
       }
 
-      setIsPro(user.is_pro === true);
+      if (user.trial_ends_at && new Date(user.trial_ends_at) > now) {
+        setIsPro(true);
+      } else {
+        setIsPro(user.is_pro); // paid Pro
+      }
+
       const userId = user.id;
       setUser({
         business_name: user.business_name,
         logo_url: user.logo_url,
         address: user.address,
         phone_number: user.phone_number,
+        trial_ends_at: user.trial_ends_at,
       });
 
       // 2. Fetch all invoices belonging to this user
@@ -136,6 +146,17 @@ export default function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
+      {user?.trial_ends_at && isAfter(new Date(user.trial_ends_at), new Date()) && (
+        <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md mb-4 text-sm font-medium shadow-sm">
+          ⏳ {differenceInDays(new Date(user.trial_ends_at), new Date())} days left in your free trial.
+          <button
+            className="ml-2 text-blue-600 underline"
+            onClick={() => router.push("/upgrade")}
+          >
+            Upgrade Now
+          </button>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto">
       {isPro && (
         <div className="inline-block mb-4 px-4 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full shadow-sm">

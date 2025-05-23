@@ -104,7 +104,6 @@ export default function NewInvoiceClient() {
           isPro: data.is_pro,
         });
       }
-      console.log("Profile data:", data);
       if (error) {
         console.error("Error fetching profile:", error);
       }
