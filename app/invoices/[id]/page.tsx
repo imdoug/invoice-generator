@@ -3,25 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions"; // ✅ moved to clean location
 import { supabase } from "@/lib/supabaseClient";
 import Navbar from "@/app/components/NavBar";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-
+import { notFound, redirect } from "next/navigation";
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user?.email) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 text-center">
-        <p className="text-gray-600 text-lg">
-          Not authenticated. Please log in to view invoices.
-        </p>
-        <Link href="/login">
-          <button className="bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition">
-            Go to Login
-          </button>
-        </Link>
-      </div>
-    );
+     redirect("/login");
   }
 
   const { id } = await params;
@@ -64,7 +51,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               {invoice.payment_method}
             </p>
             <p>
-              <span className="font-semibold">Issue Date:</span>{" "}
+              <span className="font-semibold">Issued Date:</span>{" "}
               {invoice.issue_date
                 ? new Date(invoice.issue_date).toLocaleDateString()
                 : "N/A"}

@@ -1,61 +1,64 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
-
 import Link from "next/link";
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions);
-
-  const authenticationPhrases = [
-    "Whoops! Looks like you're a stranger here. Mind slipping on your digital slippers (aka logging in)?",
-    "Hold on there, buddy! This VIP lounge requires a secret handshake... or, you know, your login details.",
-    "Denied! (Just kidding... mostly. Log in, please!)",
-    "This app is playing hard to get. Show it some love by logging in.",
-    "Psst! The app says it doesn't recognize you. Time for a digital introduction (login).",
-    "Intruder alert! Intruder alert! Just kidding, it's probably just you. Log in for clearance.",
-    "The gates are sealed! Only those with the sacred credentials (login) may pass!",
-    "Hark, traveler! The digital realm demands your identification! Log in, I say!",
-    "This app has trust issues. Prove you're you by logging in.",
-    "Login time! Let's get you in here.",
-    "Tap, tap... is this thing on? Oh, right, you need to log in first!",
-    "The fun starts after you log in. Just sayin'.",
-    "Unlock the magic! Log in now.",
-    "This app thinks you're a ghost. Prove it wrong by logging in.",
-    "Warning: May spontaneously combust if accessed without proper login.",
-    "The app is currently doing the robot. It will resume normal programming once you log in."
-  ];
-  
-  function getRandomAuthenticationPhrase() {
-    const randomIndex = Math.floor(Math.random() * authenticationPhrases.length);
-    return authenticationPhrases[randomIndex];
-  }
-
-  if (!session || !session.user?.email) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-6 text-center">
-        <p className="text-gray-600 text-lg">{getRandomAuthenticationPhrase()}</p>
-        <Link href="/login">
-          <button className="bg-primary hover:bg-blue-500 bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition">
-            Go to Login
-          </button>
-        </Link>
-      </div>
-    );
-  }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center space-y-8 text-center">
-      <h1 className="text-4xl md:text-5xl font-bold text-primary">
-        Welcome to Invoice Generator
-      </h1>
-      <p className="text-gray-700 max-w-2xl">
-        Easily create, manage, and download your invoices. Fast, simple, and professional.
-      </p>
-      <Link href="/invoices/new">
-        <button className="bg-primary hover:bg-blue-500 bg-blue-700 text-white font-semibold py-3 px-8 rounded-md text-lg shadow transition">
-          Create New Invoice
-        </button>
-      </Link>
+ <main className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex flex-col justify-center items-center px-4">
+      {/* Hero */}
+      <section className="max-w-4xl text-center mb-16">
+        <h1 className="text-5xl md:text-6xl font-extrabold text-primary mb-6">
+          Create, Send & Manage Invoices Effortlessly
+        </h1>
+        <p className="text-lg md:text-xl text-gray-700 mb-8">
+          InvoiceGen helps freelancers & small businesses generate professional invoices in seconds. Keep track of payments, impress your clients — and get paid faster.
+        </p>
+        <Link
+          href="/register"
+          className="inline-block bg-primary bg-blue-500 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-md shadow-lg transition"
+        >
+          Start Free — Get 30 Days Pro!
+        </Link>
+      </section>
+
+      {/* Features */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl">
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+          <h3 className="text-xl font-bold mb-2 text-primary">Beautiful Invoices</h3>
+          <p className="text-gray-600">
+            Customize invoices with your logo and branding. Download or email them directly to clients.
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+          <h3 className="text-xl font-bold mb-2 text-primary">Stay Organized</h3>
+          <p className="text-gray-600">
+            Manage all invoices in one secure dashboard. View status, payment methods, and track client details.
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+          <h3 className="text-xl font-bold mb-2 text-primary">Free Pro Trial</h3>
+          <p className="text-gray-600">
+            Register today and enjoy 30 days of Pro features — unlimited invoices, CSV export, and more.
+          </p>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mt-20 text-center">
+        <h2 className="text-3xl font-bold mb-4 text-primary">
+          Ready to impress your clients and get paid faster?
+        </h2>
+        <Link
+          href="/register"
+          className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-md shadow-lg transition"
+        >
+          Join Free & Try Pro for 30 Days
+        </Link>
+      </section>
+
+      {/* Footer */}
+      <footer className="mt-20 text-gray-500 text-sm">
+        &copy; {new Date().getFullYear()} InvoiceGen — Simple Invoicing for Modern Freelancers.
+      </footer>
     </main>
   );
 }

@@ -62,6 +62,8 @@ export default function NewInvoiceClient() {
     id: "",
     isPro: false
   });
+  const [showPreview, setShowPreview] = useReactState(false);
+
 
   const formMethods = useForm<InvoiceFormValues>({
     defaultValues: {
@@ -150,42 +152,51 @@ export default function NewInvoiceClient() {
     }, 500);
   };
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
-      <FormProvider {...formMethods}>
-        <form className="bg-white rounded-lg shadow-md p-6 space-y-6">
-          <InvoiceForm />
-        </form>
-      </FormProvider>
+return (
+  <div className="max-w-4xl mx-auto p-6">
+    <div className="flex justify-between items-center mb-4">
+      <button
+        onClick={() => setShowPreview(!showPreview)}
+        className="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded"
+      >
+        {showPreview ? "Back to Form" : "Preview Invoice"}
+      </button>
 
+      {invoiceCount && invoiceCount >= 3 && !profile.isPro ? (
+        <button
+          onClick={() => router.push("/upgrade")}
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow transition"
+        >
+          Upgrade to Add More
+        </button>
+      ) : (
+        <button
+          onClick={handleSaveInvoice}
+          type="button"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow transition"
+        >
+          Save Invoice
+        </button>
+      )}
+    </div>
+
+    {showPreview ? (
       <div className="bg-white rounded-lg shadow-md p-6">
         <InvoicePreview
           formData={formData as InvoiceFormValues}
           profileData={profile}
         />
-        <div className="mt-6">
-          {invoiceCount && invoiceCount >= 3  && !profile.isPro ? (
-            <button
-              onClick={() => {
-                router.push("/upgrade");
-              }}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
-            >
-              Upgrade to Add More
-            </button>
-          ) : (
-            <button
-              onClick={handleSaveInvoice}
-              type="button"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-md shadow transition"
-            >
-              Save invoice
-            </button>
-          )}
-        </div>
       </div>
-    </div>
-  );
+    ) : (
+      <FormProvider {...formMethods}>
+        <form className="bg-white rounded-lg shadow-md p-6 space-y-6">
+          <InvoiceForm />
+        </form>
+      </FormProvider>
+    )}
+  </div>
+);
+
 }
 // Removed the conflicting local useEffect function
 function useState(initialState: {
