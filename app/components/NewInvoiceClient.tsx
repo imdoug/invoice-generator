@@ -51,7 +51,6 @@ function generateInvoiceNumber() {
 }
 
 export default function NewInvoiceClient() {
-  const todayStr = new Date().toISOString().split("T")[0];
   const router = useRouter();
   const { data: session } = useSession();
   const invoiceCount = session?.user?.invoiceCount;
@@ -73,8 +72,8 @@ export default function NewInvoiceClient() {
       items: [{ description: "", quantity: 1, price: 0 }],
       notes: "",
       currency: "USD",
-      dueDate: todayStr,
-      issueDate: todayStr,
+      dueDate: "",
+      issueDate: "",
       invoiceNumber: generateInvoiceNumber(),
       logo: undefined,
       paymentMethods: "",
@@ -119,7 +118,6 @@ export default function NewInvoiceClient() {
       {
         user_id: profile.id,
         invoice_number: generatedInvoiceNumber,
-        issue_date: formData.issueDate || new Date().toISOString(),
         due_date: formData.dueDate || null,
         logo_url: profile.logo_url,
         business_name: profile.business_name,
