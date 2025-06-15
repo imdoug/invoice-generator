@@ -7,9 +7,7 @@ import { redirect } from "next/navigation";
 export default async function NewInvoicePage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user?.email) {
-    redirect("/login");
-  }
+  if (!session || !session.user?.email) redirect("/login");
 
   return (
     <>

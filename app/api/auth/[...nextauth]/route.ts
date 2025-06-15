@@ -45,6 +45,7 @@ const handler = NextAuth({
             email: userData.email,
             name: userData.name,
             is_pro: userData.is_pro,
+            logo_url: userData.logo_url
           };
         } catch (rateError) {
           console.warn("🚫 Rate limit hit:", rateError);
@@ -59,7 +60,7 @@ const handler = NextAuth({
 
       const { data: user } = await supabase
         .from("users")
-        .select("id, is_pro")
+        .select("id, is_pro, name, logo_url")
         .eq("email", session.user.email)
         .single();
 
@@ -72,13 +73,14 @@ const handler = NextAuth({
           .eq("user_id", user.id);
         invoiceCount = count ?? 0;
       }
-
       return {
         ...session,
         user: {
-          ...session.user,
+          email: session.user.email,
           invoiceCount,
           is_pro: user?.is_pro,
+          name: user?.name,
+          logo_url: user?.logo_url
         },
       };
     },

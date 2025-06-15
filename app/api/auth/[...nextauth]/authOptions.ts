@@ -43,6 +43,7 @@ export const authOptions = {
             email: userData.email,
             name: userData.name,
             is_pro: userData.is_pro,
+            logo_url: userData.logo_url
           };
         } catch {
           throw new Error("Too many login attempts. Try again later.");
@@ -57,7 +58,7 @@ export const authOptions = {
 
       const { data: user } = await supabase
         .from("users")
-        .select("id, is_pro")
+        .select("id, is_pro, name, logo_url")
         .eq("email", session.user.email)
         .single();
 
@@ -69,13 +70,14 @@ export const authOptions = {
           .eq("user_id", user.id);
         invoiceCount = count ?? 0;
       }
-
       return {
         ...session,
         user: {
-          ...session.user,
+          email: session.user.email,
           invoiceCount,
           is_pro: user?.is_pro,
+          name: user?.name,
+          logo_url: user?.logo_url
         },
       };
     },

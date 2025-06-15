@@ -7,9 +7,7 @@ const Profile = async () => {
 
   const session = await getServerSession(authOptions);
   
-    if (!session || !session.user?.email) {
-      redirect("/login");
-    }
+    if (!session || !session.user?.email) redirect("/login");
   return (
     <ProfilePage />
   )

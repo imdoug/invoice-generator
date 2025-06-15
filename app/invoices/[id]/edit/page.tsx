@@ -11,9 +11,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
 
   const { id } = await params;
   
-  if (!session || !session.user?.email) {
-    redirect("/login");
-  }
+  if (!session || !session.user?.email) redirect("/login");
 
   const { data: invoice, error } = await supabase
     .from("invoices")

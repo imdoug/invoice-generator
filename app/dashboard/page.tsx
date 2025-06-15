@@ -9,9 +9,8 @@ import Navbar from "../components/NavBar";
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user?.email) {
-    redirect("/login");
-  }
+  if (!session || !session.user?.email) redirect("/login");
+  
 
   // 1. Find the user_id based on email
   const { data: userData, error: userError } = await supabase
