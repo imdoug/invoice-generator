@@ -80,7 +80,6 @@ export default function Navbar() {
             </Link>
 
             <div className="hidden md:flex space-x-6">
-              <NavItem href="/profile" label="Profile" />
               <NavItem href="/clients" label="Clients" />
               <NavItem href="/projects" label="Projects" />
               {(isPro || (invoiceCount !== null && invoiceCount < 3)) && (
@@ -157,8 +156,9 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className="md:hidden bg-white px-6 pb-6 space-y-4">
-            <NavItem href="/profile" label="Profile" />
+          <div className="md:hidden flex flex-col bg-white px-6 pb-6 space-y-4">
+            <NavItem href="/clients" label="Clients" />
+            <NavItem href="/projects" label="Projects" />
             {(isPro || (invoiceCount !== null && invoiceCount < 3)) && (
               <NavItem href="/invoices/new" label="New Invoice" />
             )}
