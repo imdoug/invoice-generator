@@ -77,7 +77,8 @@ export const authOptions = {
           invoiceCount,
           is_pro: user?.is_pro,
           name: user?.name,
-          logo_url: user?.logo_url
+          logo_url: user?.logo_url,
+          user_id: user?.id
         },
       };
     },

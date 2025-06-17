@@ -76,6 +76,7 @@ const handler = NextAuth({
       return {
         ...session,
         user: {
+          id: user?.id,
           email: session.user.email,
           invoiceCount,
           is_pro: user?.is_pro,
