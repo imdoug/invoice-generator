@@ -69,15 +69,16 @@ export default function ClientsPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-4">
-      <h1 className="text-3xl font-bold text-primary mb-6">Your Clients</h1>
+      <div className="flex flex-row justify-between">
+        <h1 className="text-3xl font-bold text-primary mb-6">Your Clients</h1>
 
-      <button
-        onClick={handleCreate}
-        className="inline-block bg-primary hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md mb-6"
-      >
-        + Add New Client
-      </button>
-
+        <button
+          onClick={handleCreate}
+          className="inline-block bg-primary cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md mb-6"
+        >
+          + Add New Client
+        </button>
+      </div>
       {loading ? (
         <p>Loading clients...</p>
       ) : clients.length === 0 ? (
@@ -94,10 +95,10 @@ export default function ClientsPage() {
                 <p className="text-sm text-gray-600">{client.email}</p>
                 <p className="text-sm text-gray-500">{client.company_name}</p>
               </div>
-              <div className="flex space-x-4 text-sm">
+              <div className="flex space-x-4 text-sm flex-col gap-2 ">
                 <Link
                   href={`/clients/${client.id}/edit`}
-                  className="text-blue-600 hover:underline"
+                  className="bg-blue-600 py-2 px-4 text-white rounded-lg text-center w-full"
                 >
                   Edit
                 </Link>
@@ -115,7 +116,7 @@ export default function ClientsPage() {
                       toast.error("Failed to delete client");
                     }
                   }}
-                  className="text-red-500 hover:underline"
+                  className="bg-red-500 text-white p-2 rounded-lg"
                 >
                   Delete
                 </button>
